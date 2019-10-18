@@ -1,0 +1,13 @@
+{
+    "vendor": "azure",
+    "credentials": {
+        "ARM_SUBSCRIPTION_ID": "subid",
+        "ARM_TENANT_ID": "tenantid",
+        "ARM_CLIENT_ID": "clientid",
+        "ARM_CLIENT_SECRET": "clientsecret"
+    },
+    "statefiles": {
+        "aks": "/var/tmp/aks",
+        "acr": "/var/tmp/acr"
+    }
+}

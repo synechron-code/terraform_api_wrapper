@@ -15,21 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	APPLY = iota
-	PLAN
-	DESTROY
-)
-
-const (
-	CREATED = iota
-	QUEUED
-	RUNNING
-	COMPLETE
-)
-
-var jobChan chan *handler.Job
-
 func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	status := make(map[string]string)
@@ -38,13 +23,13 @@ func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 	jobID, _ := uuid.Parse(vars["jobid"])
 
 	switch handler.QueryJobStatus(jobID) {
-	case CREATED:
+	case handler.CREATED:
 		status["status"] = "created"
-	case QUEUED:
+	case handler.QUEUED:
 		status["status"] = "queued"
-	case RUNNING:
+	case handler.RUNNING:
 		status["status"] = "running"
-	case COMPLETE:
+	case handler.COMPLETE:
 		status["status"] = "complete"
 	default:
 		status["status"] = "unknown"
@@ -76,8 +61,39 @@ func setStatefiles(w http.ResponseWriter, r *http.Request) {
 
 */
 
+func createContext(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("createContext hit")
+
+	var jobContext handler.JsonJobContext
+	var vendor int
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		panic(err)
+	}
+
+	jsonerr := json.Unmarshal(body, &jobContext)
+	if jsonerr != nil {
+		panic(jsonerr)
+	}
+
+	switch jobContext.Vendor {
+	case "aws":
+		vendor = handler.AWS
+	case "azure":
+		vendor = handler.AZURE
+	case "gcp":
+		vendor = handler.GCP
+	default:
+		//panic
+		vendor = 99
+	}
+
+	json.NewEncoder(w).Encode(handler.CreateJobContext(vendor, jobContext.Credentials, jobContext.Statefiles))
+}
+
 func runJob(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("createJob hit")
+	fmt.Println("runJob hit")
 
 	var jobInstructions handler.JobInstructions
 	var action int
@@ -96,16 +112,16 @@ func runJob(w http.ResponseWriter, r *http.Request) {
 
 	switch vars["action"] {
 	case "apply":
-		action = APPLY
+		action = handler.APPLY
 	case "plan":
-		action = PLAN
+		action = handler.PLAN
 	case "destroy":
-		action = DESTROY
+		action = handler.DESTROY
 	default:
 		//panic
 	}
 
-	job := handler.CreateJob(jobInstructions, action, vars["stage"])
+	job := handler.CreateJob(jobInstructions, handler.JobContexts[jobInstructions.ContextID], action, vars["stage"])
 	go handler.JobHandler(job)
 
 	json.NewEncoder(w).Encode(job)
@@ -118,6 +134,7 @@ func api_runner(port *int) {
 	router.HandleFunc("/v1/plan/{action}/{stage}", runJob)
 	router.HandleFunc("/v1/query/status/{jobid}", queryJobStatus)
 
+	router.HandleFunc("/v1/context/create", createContext)
 	/*
 		//to do functions
 
@@ -134,6 +151,7 @@ func api_runner(port *int) {
 
 func main() {
 	handler.JobHandlerInit()
+	handler.ContextsHandlerInit()
 
 	var (
 		port = flag.Int("port", 8080, "Port to serve the API on")

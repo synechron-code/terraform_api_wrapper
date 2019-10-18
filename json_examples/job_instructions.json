@@ -1,6 +1,9 @@
 {
-    "context_id": "123e4567-e89b-12d3-a456-426655440000",
+    "context_id": "7d7e1e65-702c-4482-aee6-949f1565fde1",
     "tfvars": {
         "a_string_var": "value"
-    }
+    },
+    "remote_states": [
+        "acr"
+    ]
 }

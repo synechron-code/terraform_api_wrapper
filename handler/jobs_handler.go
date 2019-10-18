@@ -8,19 +8,6 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-const (
-	APPLY = iota
-	PLAN
-	DESTROY
-)
-
-const (
-	CREATED = iota
-	QUEUED
-	RUNNING
-	COMPLETE
-)
-
 type JobRequest struct {
 	Action    int
 	tfOptions terraform.Options
@@ -46,14 +33,29 @@ func JobHandlerInit() {
 	Jobs = make(map[uuid.UUID]*Job)
 }
 
-func CreateJob(jobInstructions JobInstructions, action int, stage string) *Job {
+func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action int, stage string) *Job {
 	//create the Job object and add it to the Jobs map.
 	//TFOptions struct for this job and put it into TF
 
+	backendConfig := map[string]interface{}{
+		"path": jobContext.Statefiles[stage],
+	}
+
+	credentials := JobContexts[jobInstructions.ContextID].Credentials
+
+	vars := jobInstructions.TfVars
+
+	for _, remoteState := range jobInstructions.RemoteStates {
+		vars["remote_state_"+remoteState] = JobContexts[jobInstructions.ContextID].Statefiles[remoteState]
+	}
+	//also need to add remote states to vars
+	//
+
 	tfOptions := terraform.Options{
-		Vars:         jobInstructions.TfVars,
-		TerraformDir: "/terraform/" + stage,
-		//BackendConfig: JobContexts[jobInstructions.ContextID].Statefiles[jobInstructions.Stage],
+		Vars:          vars,
+		TerraformDir:  "/terraform/" + stage,
+		BackendConfig: backendConfig,
+		EnvVars:       credentials,
 	}
 
 	request := JobRequest{
@@ -82,14 +84,14 @@ func JobHandler(job *Job) {
 
 	fmt.Println(job.JobID)
 	fmt.Println("Set status of job to running")
-	
+
 	time.Sleep(20 * time.Second)
 	job.Response.TfOutput = "hello"
 	//job.Response.TfOutput, job.Response.TfError := terraform.InitAndApplyE(blah)
-	
+
 	fmt.Println(job.JobID)
 	fmt.Println("Set status of job to complete")
-	
+
 	job.Status = COMPLETE
 }
 
