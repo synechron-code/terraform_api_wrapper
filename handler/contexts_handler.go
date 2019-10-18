@@ -10,29 +10,39 @@ const (
 	GCP
 )
 
-type JobContext struct (
-	statefiles []string
-	vendor int
-	credentials interface{}
-)
+type JobContext struct {
+	ContextID   uuid.UUID
+	Statefiles  []string
+	Vendor      int
+	Credentials interface{}
+}
 
 var JobContexts map[uuid.UUID]JobContext
 
-func createNewJobContext() (uuid.UUID) {
+func CreateNewJobContext() uuid.UUID {
 	contextID := uuid.New()
-	JobContexts[contextID] = new JobContext{}
+	JobContexts[contextID] = JobContext{ContextID: contextID}
 
 	return contextID
 }
 
-func setCredentials(contextID uuid.UUID, credentials interface{}) {
-	JobContexts[contextID].credentials = credentials
+func SetCredentials(contextID uuid.UUID, credentials interface{}) {
+	var jobContext = JobContexts[contextID]
+
+	jobContext.Credentials = credentials
+	JobContexts[contextID] = jobContext
 }
 
-func setVendor(contextID uuid.UUID, vendor int) {
-	JobContexts[contextID].vendor = vendor
+func SetVendor(contextID uuid.UUID, vendor int) {
+	var jobContext = JobContexts[contextID]
+
+	jobContext.Vendor = vendor
+	JobContexts[contextID] = jobContext
 }
 
-func setStateFiles(contextID uuid.UUID, statefiles []string) {
-	JobContexts[contextID].statefiles = statefiles
+func SetStateFiles(contextID uuid.UUID, statefiles []string) {
+	var jobContext = JobContexts[contextID]
+
+	jobContext.Statefiles = statefiles
+	JobContexts[contextID] = jobContext
 }
