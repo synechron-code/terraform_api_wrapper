@@ -14,6 +14,7 @@ There are two steps to using this API
 Example of creating a resource group and a managed disk in Azure
 
 1. Create an execution context
+```
     {
         "vendor": "azure",
         "credentials": {
@@ -27,29 +28,30 @@ Example of creating a resource group and a managed disk in Azure
             "disk": "/home/ian/test/disk/terraform.tfstate"
         }
     }
-
+```
 2. POST it
-
+```
 curl -X POST -d @context.json localhost:8080/v1/context/create
 {"context_id":"2b4b3fae-fb8e-4750-b06b-7378343cfaf1"}
-
+```
 3. Create the resource group json
-
+```
     {
         "context_id": "2b4b3fae-fb8e-4750-b06b-7378343cfaf1",
         "tfvars": {
             "name": "test_rg"
         }
     }
-
+```
 4. Create the resource_group YAML and put it in a folder called "resource_group" (the directory name has to match the value in "statefiles" in the context, and the plan name in the job/create/{plan}/{action} URI)
 
 5. POST it 
+```
     curl -X POST -d @rg_instructions.json localhost:8080/v1/job/create/resource_group/apply
     {"JobID":"2b4b3fae-fb8e-4750-b06b-7378343cfaf1"}
-
+```
 6. Create the disk json
-
+```
     {
             "context_id": "2b4b3fae-fb8e-4750-b06b-7378343cfaf1",
             "tfvars": {
@@ -60,13 +62,14 @@ curl -X POST -d @context.json localhost:8080/v1/context/create
                     "resource_group"
             ]
     }
-
+```
 7. Create the disk YAML and put it in a folder called "disk"
 
 8. POST it
+```
 curl -X POST -d @disk_instructions.json localhost:8080/v1/job/create/disk/apply
 {"JobID":"0de42156-3ce8-4c30-a4e1-60e74e8a8b37"}
-
+```
 ## Checking the job status
 Because creating resources in public cloud can involve long-running jobs, the instructions POSTed to the endpoint will immediately return a JobID while Terraform runs asynchronously.
 You can check the status of a running job by calling /job/status/{jobId}
