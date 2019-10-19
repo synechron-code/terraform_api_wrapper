@@ -73,12 +73,13 @@ curl -X POST -d @disk_instructions.json localhost:8080/v1/job/create/disk/apply
 ## Checking the job status
 Because creating resources in public cloud can involve long-running jobs, the instructions POSTed to the endpoint will immediately return a JobID while Terraform runs asynchronously.
 You can check the status of a running job by calling /job/status/{jobId}
-
+```
 curl -X POST localhost:8080/v1/job/status/2b4b3fae-fb8e-4750-b06b-7378343cfaf1
 {"jobid":"2b4b3fae-fb8e-4750-b06b-7378343cfaf1","status":"running"}
-
+```
 ## Getting the job output
 Once a job status has transitioned to "complete" the output will be available to view.  It will need some parsing to pretty print it. You can use terratest's log analyser to view it.
-
+```
 curl -X POST localhost:8080/v1/job/response/2b4b3fae-fb8e-4750-b06b-7378343cfaf1
 {"TfOutput":"\u001b[0m\u001b[1mdata.terraform_remote_state.rg_group: Refreshing state...\u001b[0m\n\u001b[0m\u001b[1mazurerm_managed_disk.test: Creating...\u001b[0m\n  create_option:        \"\" =\u003e \"Empty\"\n  disk_iops_read_write: \"\" =\u003e \"\u003ccomputed\u003e\"\n  disk_mbps_read_write: \"\" =\u003e \"\u003ccomputed\u003e\"\n  disk_size_gb:         \"\" =\u003e \"1\"\n  location:             \"\" =\u003e \"westus\"\n  name:                 \"\" =\u003e \"testdisk\"\n  resource_group_name:  \"\" =\u003e \"test_rg\"\n  source_uri:           \"\" =\u003e \"\u003ccomputed\u003e\"\n  storage_account_type: \"\" =\u003e \"Standard_LRS\"\n  tags.%:               \"\" =\u003e \"\u003ccomputed\u003e\"\u001b[0m\n\u001b[0m\u001b[1mazurerm_managed_disk.test: Creation complete after 2s (ID: /subscriptions/ea9a7509-82bb-430a-857f-...iders/Microsoft.Compute/disks/testdisk)\u001b[0m\u001b[0m\n\u001b[0m\u001b[1m\u001b[32m\nApply complete! Resources: 1 added, 0 changed, 0 destroyed.\u001b[0m","TfError":null}
+```
