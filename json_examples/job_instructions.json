@@ -1,7 +1,7 @@
 {
-    "context_id": "7d7e1e65-702c-4482-aee6-949f1565fde1",
+    "context_id": "52fc85f1-51cc-4282-a5c9-f5377a8b8662",
     "tfvars": {
-        "a_string_var": "value"
+        "name": "test_rg"
     },
     "remote_states": [
         "acr"

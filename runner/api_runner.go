@@ -1,8 +1,7 @@
-package main
+package runner
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -37,29 +36,6 @@ func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(status)
 }
-
-/*
-to do functions
-
-func getJobResponse(w http.ResponseWriter, r *http.Request) {
-
-}
-
-
-func setCredentials(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func setVendor(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func setStatefiles(w http.ResponseWriter, r *http.Request) {
-
-}
-
-
-*/
 
 func createContext(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("createContext hit")
@@ -127,36 +103,29 @@ func runJob(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(job)
 }
 
-func api_runner(port *int) {
+func getJobResponse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("getJobResponse hit")
+
+	vars := mux.Vars(r)
+
+	jobId, _ := uuid.Parse(vars["jobid"])
+
+	json.NewEncoder(w).Encode(handler.GetJobResponse(jobId))
+}
+
+func Api_runner(port *int) {
+	handler.JobHandlerInit()
+	handler.ContextsHandlerInit()
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/v1/plan/{action}/{stage}", runJob)
-	router.HandleFunc("/v1/query/status/{jobid}", queryJobStatus)
-
 	router.HandleFunc("/v1/context/create", createContext)
-	/*
-		//to do functions
 
-		router.HandleFunc("/v1/context/statefiles", setStatefiles)
-		router.HandleFunc("/v1/context/vendor", setVendor)
-		router.HandleFunc("/v1/context/credentials", setCredentials)
-		router.HandleFunc("/v1/query/response/{jobid}", getJobResponse)
-	*/
+	router.HandleFunc("/v1/job/create/{stage}/{action}", runJob)
+	router.HandleFunc("/v1/job/response/{jobid}", getJobResponse)
+	router.HandleFunc("/v1/job/status/{jobid}", queryJobStatus)
 
 	http.Handle("/", router)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func main() {
-	handler.JobHandlerInit()
-	handler.ContextsHandlerInit()
-
-	var (
-		port = flag.Int("port", 8080, "Port to serve the API on")
-	)
-	flag.Parse()
-
-	api_runner(port)
 }
