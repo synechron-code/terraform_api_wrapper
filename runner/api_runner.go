@@ -113,8 +113,8 @@ func getJobResponse(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(handler.GetJobResponse(jobId))
 }
 
-func Api_runner(port *int) {
-	handler.JobHandlerInit()
+func Api_runner(port *int, plan_location string) {
+	handler.JobHandlerInit(plan_location)
 	handler.ContextsHandlerInit()
 
 	router := mux.NewRouter().StrictSlash(true)

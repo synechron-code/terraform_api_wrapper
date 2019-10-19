@@ -8,9 +8,10 @@ import (
 func main() {
 
 	var (
-		port = flag.Int("port", 8080, "Port to serve the API on")
+		port          = flag.Int("port", 8080, "Port to serve the API on")
+		plan_location = flag.String("plan-location", "~/terraform", "Top level directory containing your terraform plans")
 	)
 	flag.Parse()
 
-	runner.Api_runner(port)
+	runner.Api_runner(port, *plan_location)
 }

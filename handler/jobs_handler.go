@@ -27,9 +27,11 @@ type Job struct {
 }
 
 var Jobs map[uuid.UUID]*Job
+var planLocation string
 
-func JobHandlerInit() {
+func JobHandlerInit(plan_location string) {
 	Jobs = make(map[uuid.UUID]*Job)
+	planLocation = plan_location
 }
 
 func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action int, stage string) *Job {
@@ -50,7 +52,7 @@ func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action in
 
 	tfOptions := terraform.Options{
 		Vars:          vars,
-		TerraformDir:  "/home/ian/test/" + stage,
+		TerraformDir:  planLocation + "/" + stage,
 		BackendConfig: backendConfig,
 		EnvVars:       credentials,
 	}
