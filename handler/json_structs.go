@@ -5,16 +5,9 @@ import (
 )
 
 type JobInstructions struct {
-	ContextID uuid.UUID              `json:"context_id"`
-	TfVars    map[string]interface{} `json:"tfvars"`
-	RemoteStates []string			`json:"remote_states"`
-}
-
-type AzureCredentials struct {
-	ARM_Tenant_ID       string `json:"arm_tenant_id"`
-	ARM_Subscription_ID string `json:"arm_subscription_id"`
-	ARM_Client_ID       string `json:"arm_client_id"`
-	ARM_Client_Secret   string `json:"arm_client_secret`
+	ContextID    uuid.UUID              `json:"context_id"`
+	TfVars       map[string]interface{} `json:"tfvars"`
+	RemoteStates []string               `json:"remote_states"`
 }
 
 type StatefileLocations struct {
@@ -26,7 +19,7 @@ type Vendor struct {
 }
 
 type JsonJobContext struct {
-	Vendor string `json:"vendor"`
-	Statefiles map[string]string	`json:"statefiles"`	
+	Vendor      string            `json:"vendor"`
+	Statefiles  map[string]string `json:"statefiles"`
 	Credentials map[string]string `json:"credentials"`
 }

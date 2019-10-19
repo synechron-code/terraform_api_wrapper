@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"testing"
-	//"time"
 )
 
 type JobRequest struct {
@@ -85,9 +84,6 @@ func JobHandler(job *Job) {
 
 	fmt.Println(job.JobID)
 	fmt.Println("Set status of job to running")
-
-	//time.Sleep(20 * time.Second)
-	//job.Response.TfOutput = "hello"
 
 	t := new(testing.T)
 
