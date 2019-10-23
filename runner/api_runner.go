@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"citihub.com/terraform_api_wrapper/handler"
+	"github.com/citihub/terraform_api_wrapper/handler"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
