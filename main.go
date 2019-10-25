@@ -1,8 +1,9 @@
 package main
 
 import (
-	"citihub.com/terraform_api_wrapper/runner"
 	"flag"
+	"fmt"
+	"github.com/citihub/terraform_api_wrapper/runner"
 )
 
 func main() {
@@ -13,6 +14,6 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Fprintf("Serving API on port %d", port)
+	fmt.Printf("Serving API on port %v", port)
 	runner.API_runner(port, *planLocation)
 }

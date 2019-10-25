@@ -46,7 +46,7 @@ func SetStateFiles(contextID uuid.UUID, statefiles map[string]string) {
 	JobContexts[contextID] = jobContext
 }
 
-func CreateJobContext(vendor int, credentials map[string]string, statefiles map[string]string) uuid.UUID {
+func CreateJobContext(vendor int, credentials map[string]string, statefiles map[string]string) string {
 	contextID := CreateNewJobContext()
 	SetVendor(contextID, vendor)
 	SetCredentials(contextID, credentials)
