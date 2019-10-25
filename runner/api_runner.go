@@ -108,6 +108,7 @@ func runJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	job := handler.CreateJob(jobInstructions, handler.JobContexts[jobInstructions.ContextID], action, vars["stage"])
+
 	go handler.JobHandler(job)
 
 	json.NewEncoder(w).Encode(job)

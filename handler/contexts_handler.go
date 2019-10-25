@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -51,5 +52,5 @@ func CreateJobContext(vendor int, credentials map[string]string, statefiles map[
 	SetCredentials(contextID, credentials)
 	SetStateFiles(contextID, statefiles)
 
-	return contextID
+	return fmt.Sprintf("{\"context_id\": \"%v\"}", contextID)
 }
