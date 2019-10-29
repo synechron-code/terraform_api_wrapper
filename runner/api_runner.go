@@ -125,9 +125,9 @@ func getJobResponse(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func API_runner(port *int, plan_location string) {
+func API_runner(port *int, plan_location string, context_location string) {
 	handler.JobHandlerInit(plan_location)
-	handler.ContextsHandlerInit()
+	handler.ContextsHandlerInit(plan_location, context_location)
 
 	router := mux.NewRouter().StrictSlash(true)
 

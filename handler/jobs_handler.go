@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -29,6 +30,7 @@ type Job struct {
 
 var Jobs map[uuid.UUID]*Job
 var planLocation string
+var contextLocation string
 
 func JobHandlerInit(plan_location string) {
 	Jobs = make(map[uuid.UUID]*Job)
@@ -53,7 +55,7 @@ func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action in
 
 	tfOptions := terraform.Options{
 		Vars:          vars,
-		TerraformDir:  planLocation + "/" + stage,
+		TerraformDir:  fmt.Sprintf("%v/%v/%v", contextLocation, jobContext.ContextID, stage),
 		BackendConfig: backendConfig,
 		EnvVars:       credentials,
 	}
@@ -112,9 +114,9 @@ func JobHandler(job *Job) {
 		//TODO: improve job Status based on Terratest assertion
 	default:
 		tfOutput = ""
-		tfError = errors.New(json.Marshal("{\"error\": \"unrecognised job action\"}")
+		errorMessage, _ := json.RawMessage("\"JobHandler Error\": \"Action not recognised\"").MarshalJSON()
+		tfError = errors.New(fmt.Sprintf("%v", errorMessage))
 		job.Status = JOBERROR
-		return
 		//panic
 	}
 

@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/google/uuid"
+	"os/exec"
 )
 
 type JobContext struct {
@@ -13,13 +15,33 @@ type JobContext struct {
 
 var JobContexts map[uuid.UUID]JobContext
 
-func ContextsHandlerInit() {
+var planLocation_g string
+var contextLocation_g string
+
+func ContextsHandlerInit(planLocation string, contextLocation string) {
 	JobContexts = make(map[uuid.UUID]JobContext)
+	planLocation_g = planLocation
+	contextLocation_g = contextLocation
 }
 
 func CreateNewJobContext() uuid.UUID {
 	contextID := uuid.New()
 	JobContexts[contextID] = JobContext{ContextID: contextID}
+
+	//mkdir context-location/contextID
+	mkContextDir := exec.Command("mkdir", fmt.Sprintf("%s/%s", contextLocation_g, contextID))
+	cpPlansToContext := exec.Command("cp", planLocation_g, fmt.Sprintf("%s/%s", contextLocation_g, contextID))
+	//cp plansLocation context-location/contextID
+
+	err := mkContextDir.Run()
+	if err != nil {
+		fmt.Printf("Error making directory %v\n", err)
+	}
+
+	err = cpPlansToContext.Run()
+	if err != nil {
+		fmt.Printf("Error making directory %v\n", err)
+	}
 
 	return contextID
 }
@@ -37,6 +59,12 @@ func SetVendor(contextID uuid.UUID, vendor int) {
 	jobContext.Vendor = vendor
 	JobContexts[contextID] = jobContext
 }
+
+/*
+func CreatePlanContext(contextID uuid.UUID, plansLocation string) {
+
+}
+*/
 
 func SetStateFiles(contextID uuid.UUID, statefiles map[string]string) {
 	var jobContext = JobContexts[contextID]
