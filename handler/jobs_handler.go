@@ -104,11 +104,15 @@ func JobHandler(job *Job) {
 		//TODO: improve job Status based on Terratest assertion
 	case DESTROY:
 		fmt.Println("running destroy")
+		tfOutput, tfError = terraform.InitE(t, &job.Request.tfOptions)
+		if tfError != nil {
+			break
+		}
 		tfOutput, tfError = terraform.DestroyE(t, &job.Request.tfOptions)
 		//TODO: improve job Status based on Terratest assertion
 	default:
 		tfOutput = ""
-		tfError = errors.New("{error: unrecognised job action}")
+		tfError = errors.New(json.Marshal("{\"error\": \"unrecognised job action\"}")
 		job.Status = JOBERROR
 		return
 		//panic
