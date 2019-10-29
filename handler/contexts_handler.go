@@ -30,7 +30,7 @@ func CreateNewJobContext() uuid.UUID {
 
 	//mkdir context-location/contextID
 	mkContextDir := exec.Command("mkdir", fmt.Sprintf("%s/%s", contextLocation_g, contextID))
-	cpPlansToContext := exec.Command("cp", "-r", fmt.Sprintf("%s/*", planLocation_g), fmt.Sprintf("%s/%s", contextLocation_g, contextID.String()))
+	cpPlansToContext := exec.Command("sh", "-c", fmt.Sprintf("cp -r %s/* %s/%s", planLocation_g, contextLocation_g, contextID.String()))
 	//cp plansLocation context-location/contextID
 
 	out, err := mkContextDir.CombinedOutput()
@@ -40,7 +40,6 @@ func CreateNewJobContext() uuid.UUID {
 	}
 
 	cpout, cperr := cpPlansToContext.CombinedOutput()
-	fmt.Printf("workspace cp command: %v", cpPlansToContext.)
 	fmt.Printf("workspace cp: %v", cpout)
 	if cperr != nil {
 		fmt.Printf("Error making directory %v\n", cperr)
