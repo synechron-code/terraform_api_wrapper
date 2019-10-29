@@ -39,7 +39,7 @@ func CreateNewJobContext() uuid.UUID {
 		fmt.Printf("Error making directory %v\n", err)
 	}
 
-	cpout, cperr = cpPlansToContext.CombinedOutput()
+	cpout, cperr := cpPlansToContext.CombinedOutput()
 	fmt.Printf("workspace cp: %v", cpout)
 	if cperr != nil {
 		fmt.Printf("Error making directory %v\n", cperr)
