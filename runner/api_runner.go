@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"citihub.com/terraform_api_wrapper/handler"
+	"github.com/citihub/terraform_api_wrapper/handler"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -19,7 +19,11 @@ func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 	status := make(map[string]string)
 	status["jobid"] = vars["jobid"]
 
-	jobID, _ := uuid.Parse(vars["jobid"])
+	jobID, err := uuid.Parse(vars["jobid"])
+	if err != nil {
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		return
+	}
 
 	switch handler.QueryJobStatus(jobID) {
 	case handler.CREATED:
@@ -30,6 +34,10 @@ func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 		status["status"] = "running"
 	case handler.COMPLETE:
 		status["status"] = "complete"
+	case handler.ASSERTING:
+		status["status"] = "asserting"
+	case handler.JOBERROR:
+		status["status"] = "error"
 	default:
 		status["status"] = "unknown"
 	}
@@ -38,19 +46,19 @@ func queryJobStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func createContext(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("createContext hit")
-
 	var jobContext handler.JsonJobContext
 	var vendor int
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		panic(err)
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		return
 	}
 
 	jsonerr := json.Unmarshal(body, &jobContext)
 	if jsonerr != nil {
-		panic(jsonerr)
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		return
 	}
 
 	switch jobContext.Vendor {
@@ -61,7 +69,6 @@ func createContext(w http.ResponseWriter, r *http.Request) {
 	case "gcp":
 		vendor = handler.GCP
 	default:
-		//panic
 		vendor = 99
 	}
 
@@ -69,19 +76,21 @@ func createContext(w http.ResponseWriter, r *http.Request) {
 }
 
 func runJob(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("runJob hit")
-
 	var jobInstructions handler.JobInstructions
 	var action int
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		panic(err)
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		//panic(err)
+		return
 	}
 
 	jsonerr := json.Unmarshal(body, &jobInstructions)
 	if jsonerr != nil {
-		panic(jsonerr)
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		//panic(jsonerr)
+		return
 	}
 
 	vars := mux.Vars(r)
@@ -94,28 +103,31 @@ func runJob(w http.ResponseWriter, r *http.Request) {
 	case "destroy":
 		action = handler.DESTROY
 	default:
-		//panic
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: action not recognised}"))
+		return
 	}
 
 	job := handler.CreateJob(jobInstructions, handler.JobContexts[jobInstructions.ContextID], action, vars["stage"])
+
 	go handler.JobHandler(job)
 
 	json.NewEncoder(w).Encode(job)
 }
 
 func getJobResponse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("getJobResponse hit")
-
 	vars := mux.Vars(r)
 
-	jobId, _ := uuid.Parse(vars["jobid"])
-
-	json.NewEncoder(w).Encode(handler.GetJobResponse(jobId))
+	jobId, err := uuid.Parse(vars["jobid"])
+	if err != nil {
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+	} else {
+		json.NewEncoder(w).Encode(handler.GetJobResponse(jobId))
+	}
 }
 
-func Api_runner(port *int, plan_location string) {
+func API_runner(port *int, plan_location string, context_location string) {
 	handler.JobHandlerInit(plan_location)
-	handler.ContextsHandlerInit()
+	handler.ContextsHandlerInit(plan_location, context_location)
 
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -127,5 +139,5 @@ func Api_runner(port *int, plan_location string) {
 
 	http.Handle("/", router)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }

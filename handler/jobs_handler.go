@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -28,6 +30,7 @@ type Job struct {
 
 var Jobs map[uuid.UUID]*Job
 var planLocation string
+var contextLocation string
 
 func JobHandlerInit(plan_location string) {
 	Jobs = make(map[uuid.UUID]*Job)
@@ -52,7 +55,7 @@ func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action in
 
 	tfOptions := terraform.Options{
 		Vars:          vars,
-		TerraformDir:  planLocation + "/" + stage,
+		TerraformDir:  fmt.Sprintf("%v/%v/%v", contextLocation, jobContext.ContextID, stage),
 		BackendConfig: backendConfig,
 		EnvVars:       credentials,
 	}
@@ -77,6 +80,10 @@ func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action in
 	return &newJob
 }
 
+func AssertJobStatus(job *Job) {
+	job.Status = COMPLETE
+}
+
 func JobHandler(job *Job) {
 	var tfOutput string
 	var tfError error
@@ -84,8 +91,7 @@ func JobHandler(job *Job) {
 	fmt.Println("Entering JobHandler")
 	job.Status = RUNNING
 
-	fmt.Println(job.JobID)
-	fmt.Println("Set status of job to running")
+	fmt.Println(fmt.Sprintf("Set status of job %s to running", job.JobID))
 
 	t := new(testing.T)
 
@@ -93,24 +99,33 @@ func JobHandler(job *Job) {
 	case APPLY:
 		fmt.Println("running apply")
 		tfOutput, tfError = terraform.InitAndApplyE(t, &job.Request.tfOptions)
+		//TODO: improve job Status based on Terratest assertion
 	case PLAN:
 		fmt.Println("running plan")
 		tfOutput, tfError = terraform.InitAndPlanE(t, &job.Request.tfOptions)
+		//TODO: improve job Status based on Terratest assertion
 	case DESTROY:
 		fmt.Println("running destroy")
+		tfOutput, tfError = terraform.InitE(t, &job.Request.tfOptions)
+		if tfError != nil {
+			break
+		}
 		tfOutput, tfError = terraform.DestroyE(t, &job.Request.tfOptions)
+		//TODO: improve job Status based on Terratest assertion
 	default:
-		tfOutput = "none"
+		tfOutput = ""
+		errorMessage, _ := json.RawMessage("\"JobHandler Error\": \"Action not recognised\"").MarshalJSON()
+		tfError = errors.New(fmt.Sprintf("%v", errorMessage))
+		job.Status = JOBERROR
 		//panic
 	}
 
 	job.Response.TfOutput = tfOutput
 	job.Response.TfError = tfError
 
-	fmt.Println(job.JobID)
-	fmt.Println("Set status of job to complete")
+	AssertJobStatus(job)
 
-	job.Status = COMPLETE
+	fmt.Println(fmt.Sprintf("Set status of job %s to running", job.JobID))
 }
 
 func QueryJobStatus(jobId uuid.UUID) int {

@@ -7,10 +7,14 @@ const (
 )
 
 const (
-	CREATED = iota
-	QUEUED
-	RUNNING
-	COMPLETE
+	CREATED   = iota
+	QUEUED    //Job is queued for execution by Terraform
+	RUNNING   //Terraform is currently running this Job
+	ASSERTING //working out whether there was an error in Terraform execution
+	COMPLETE  //Job completed successfully
+	JOBERROR  //There was an error outside of Terraform execution
+	TFERROR   //Terrform returned errors
+	TFWARNING //Terraform returned warnings but no errors
 )
 
 const (
