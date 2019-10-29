@@ -32,9 +32,10 @@ var Jobs map[uuid.UUID]*Job
 var planLocation string
 var contextLocation string
 
-func JobHandlerInit(plan_location string) {
+func JobHandlerInit(plan_location string, context_location string) {
 	Jobs = make(map[uuid.UUID]*Job)
 	planLocation = plan_location
+	contextLocation = context_location
 }
 
 func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action int, stage string) *Job {
