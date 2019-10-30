@@ -59,6 +59,7 @@ func CreateJob(jobInstructions JobInstructions, jobContext JobContext, action in
 		TerraformDir:  fmt.Sprintf("%v/%v/%v", contextLocation, jobContext.ContextID, stage),
 		BackendConfig: backendConfig,
 		EnvVars:       credentials,
+		NoStderr:      true,
 	}
 
 	request := JobRequest{
