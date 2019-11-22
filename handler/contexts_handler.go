@@ -62,14 +62,15 @@ func SetCredentials(contextID uuid.UUID, credentials map[string]string) {
 	JobContexts[contextID] = jobContext
 }
 
-func SetCertificates(contextID uuid.UUID, certificateData map[string]string) error {
+func SetCertificates(contextID uuid.UUID, certificateData []CertificateData) error {
 	jobContext := JobContexts[contextID]
 
-	for k, v := range certificateData {
-		certLoc := fmt.Sprintf("%s/%s/%s", contextLocation_g, contextID, k)
-		data, err := base64.StdEncoding.DecodeString(v)
+	for c := range certificateData {
+
+		certLoc := fmt.Sprintf("%s/%s/%s.%s", contextLocation_g, contextID, certificateData[c].CredentialName, certificateData[c].Type)
+		data, err := base64.StdEncoding.DecodeString(certificateData[c].Data)
 		if err != nil {
-			fmt.Printf("Error base64 decoding certificate data for %s", k)
+			fmt.Printf("Error base64 decoding certificate data for %s", certificateData[c].CredentialName)
 			return err
 		}
 
@@ -81,10 +82,10 @@ func SetCertificates(contextID uuid.UUID, certificateData map[string]string) err
 		defer f.Close()
 
 		if _, err := f.Write(data); err != nil {
-			fmt.Printf("Error %v writing certificate file for %s to location %s", err, k, certLoc)
+			fmt.Printf("Error %v writing certificate file for %s to location %s", err, certificateData[c].CredentialName, certLoc)
 			return err
 		}
-		jobContext.Credentials[k] = certLoc
+		jobContext.Credentials[certificateData[c].CredentialName] = certLoc
 	}
 
 	JobContexts[contextID] = jobContext
@@ -111,7 +112,7 @@ func SetStateFiles(contextID uuid.UUID, statefiles map[string]string) {
 	JobContexts[contextID] = jobContext
 }
 
-func CreateJobContext(vendor int, credentials map[string]string, certificateData map[string]string, statefiles map[string]string) (map[string]string, error) {
+func CreateJobContext(vendor int, credentials map[string]string, certificateData []CertificateData, statefiles map[string]string) (map[string]string, error) {
 	contextID, err := CreateNewJobContext()
 	if err != nil {
 		return nil, err

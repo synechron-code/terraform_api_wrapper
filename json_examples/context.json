@@ -6,9 +6,13 @@
         "ARM_CLIENT_ID": "clientid",
         "ARM_CLIENT_SECRET": "clientsecret"
     },
-    "certificate_data": {
-        "ARM_CERTIFICATE_DATA": "aSBhbSBhIGNlcnRpZmljYXRlCg=="
-    },
+    "certificate_data": [
+        {
+            "credential_name": "ARM_CLIENT_CERTIFICATE_PATH",         
+            "data": "aSBhbSBhIGNlcnRpZmljYXRlCg==",
+            "encoding": "pfx"
+        }
+    ],
     "statefiles": {
         "aks": "/var/tmp/aks",
         "acr": "/var/tmp/acr"

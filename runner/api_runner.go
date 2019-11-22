@@ -139,7 +139,7 @@ func API_runner(port *int, plan_location string, context_location string) {
 	handler.JobHandlerInit(plan_location, context_location)
 	handler.ContextsHandlerInit(plan_location, context_location)
 
-	fmt.Println("v0.1.7")
+	fmt.Println("v0.1.9")
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/v1/context/create", createContext)

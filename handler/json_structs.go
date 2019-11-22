@@ -22,5 +22,11 @@ type JsonJobContext struct {
 	Vendor           string            `json:"vendor"`
 	Statefiles       map[string]string `json:"statefiles"`
 	Credentials      map[string]string `json:"credentials"`
-	Certificate_Data map[string]string `json:"certificate_data"`
+	Certificate_Data []CertificateData `json:"certificate_data"`
+}
+
+type CertificateData struct {
+	CredentialName string `json:"credential_name"`
+	Data           string `json:"data"`
+	Type           string `json:"encoding"`
 }
