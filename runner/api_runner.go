@@ -61,12 +61,12 @@ func createContext(w http.ResponseWriter, r *http.Request) {
 
 	body, ioerr := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if ioerr != nil {
-		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", ioerr))
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error reading body: %v}", ioerr))
 		return
 	}
 
 	if err := json.Unmarshal(body, &jobContext); err != nil {
-		json.NewEncoder(w).Encode(fmt.Sprintf("{error: %v}", err))
+		json.NewEncoder(w).Encode(fmt.Sprintf("{error unmarshalling data: %v}", err))
 		return
 	}
 
@@ -81,7 +81,12 @@ func createContext(w http.ResponseWriter, r *http.Request) {
 		vendor = 99
 	}
 
-	json.NewEncoder(w).Encode(handler.CreateJobContext(vendor, jobContext.Credentials, jobContext.Statefiles))
+	contextID, err := handler.CreateJobContext(vendor, jobContext.Credentials, jobContext.Certificate_Data, jobContext.Statefiles)
+	if err != nil {
+		json.NewEncoder(w).Encode(err)
+	} else {
+		json.NewEncoder(w).Encode(contextID)
+	}
 }
 
 func runJob(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +139,7 @@ func API_runner(port *int, plan_location string, context_location string) {
 	handler.JobHandlerInit(plan_location, context_location)
 	handler.ContextsHandlerInit(plan_location, context_location)
 
-	fmt.Println("v0.1.5")
+	fmt.Println("v0.1.7")
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/v1/context/create", createContext)

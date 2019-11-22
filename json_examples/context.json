@@ -6,6 +6,9 @@
         "ARM_CLIENT_ID": "clientid",
         "ARM_CLIENT_SECRET": "clientsecret"
     },
+    "certificate_data": {
+        "ARM_CERTIFICATE_DATA": "aSBhbSBhIGNlcnRpZmljYXRlCg=="
+    },
     "statefiles": {
         "aks": "/var/tmp/aks",
         "acr": "/var/tmp/acr"
