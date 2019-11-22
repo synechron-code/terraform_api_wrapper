@@ -95,7 +95,7 @@ func SetVendor(contextID uuid.UUID, vendor int) {
 	jobContext := JobContexts[contextID]
 
 	jobContext.Vendor = vendor
-	//JobContexts[contextID] = jobContext
+	JobContexts[contextID] = jobContext
 }
 
 /*
@@ -108,7 +108,7 @@ func SetStateFiles(contextID uuid.UUID, statefiles map[string]string) {
 	jobContext := JobContexts[contextID]
 
 	jobContext.Statefiles = statefiles
-	//JobContexts[contextID] = jobContext
+	JobContexts[contextID] = jobContext
 }
 
 func CreateJobContext(vendor int, credentials map[string]string, certificateData map[string]string, statefiles map[string]string) (map[string]string, error) {
